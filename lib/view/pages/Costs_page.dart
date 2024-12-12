@@ -323,12 +323,12 @@ class _CostsPageState extends State<Costs_Page> {
                     },
                     child: const Text(
                       "Hitung Harga",
-                      style: TextStyle(fontSize: 16),
+                      style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 32, vertical: 12),
-                      backgroundColor: Colors.blue,
+                      backgroundColor: Colors.lightGreen.shade400,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
