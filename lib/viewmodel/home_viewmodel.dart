@@ -9,8 +9,9 @@ class HomeViewmodel with ChangeNotifier {
   final _homeRepo = HomeRepository();
 
   ApiResponse<List<Province>> provinceList = ApiResponse.loading();
-  ApiResponse<List<City>> cityListOrigin = ApiResponse.loading();
-  ApiResponse<List<City>> cityListDestination = ApiResponse.loading();
+  ApiResponse<List<City>> _cityListAsal = ApiResponse.loading();
+  ApiResponse<List<City>> _cityListTujuan = ApiResponse.loading();
+  ApiResponse<List<City>> _cityList = ApiResponse.loading();
   ApiResponse<List<Costs>> costList = ApiResponse.loading();
 
   bool isLoading = false;
@@ -19,94 +20,102 @@ class HomeViewmodel with ChangeNotifier {
     notifyListeners();
   }
 
+  // Province List Methods
   setProvinceList(ApiResponse<List<Province>> response) {
     provinceList = response;
     notifyListeners();
   }
 
-  setCityListOrigin(ApiResponse<List<City>> response) {
-    cityListOrigin = response;
+  Future<void> getProvinceList() async {
+    setProvinceList(ApiResponse.loading());
+    _homeRepo.fetchProvinceList().then((value) {
+      setProvinceList(ApiResponse.completed(value));
+    }).onError((error, stackTrace) {
+      setProvinceList(ApiResponse.error(error.toString()));
+    });
+  }
+
+  // City List for Asal Methods
+  ApiResponse<List<City>> get cityListAsal => _cityListAsal;
+
+  set cityListAsal(ApiResponse<List<City>> response) {
+    _cityListAsal = response;
     notifyListeners();
   }
 
-  setCityListDestination(ApiResponse<List<City>> response) {
-    cityListDestination = response;
+  Future<void> getCityListAsal(String provId) async {
+    cityListAsal = ApiResponse.loading();
+    _homeRepo.fetchCityList(provId).then((value) {
+      cityListAsal = ApiResponse.completed(value);
+    }).onError((error, stackTrace) {
+      cityListAsal = ApiResponse.error(error.toString());
+    });
+  }
+
+  // City List for Tujuan Methods
+  ApiResponse<List<City>> get cityListTujuan => _cityListTujuan;
+
+  set cityListTujuan(ApiResponse<List<City>> response) {
+    _cityListTujuan = response;
     notifyListeners();
   }
 
+  Future<void> getCityListTujuan(String provId) async {
+    cityListTujuan = ApiResponse.loading();
+    _homeRepo.fetchCityList(provId).then((value) {
+      cityListTujuan = ApiResponse.completed(value);
+    }).onError((error, stackTrace) {
+      cityListTujuan = ApiResponse.error(error.toString());
+    });
+  }
+
+  // General City List Methods (for other pages)
+  ApiResponse<List<City>> get cityList => _cityList;
+
+  set cityList(ApiResponse<List<City>> response) {
+    _cityList = response;
+    notifyListeners();
+  }
+
+  Future<void> getCityList(String provId) async {
+    cityList = ApiResponse.loading();
+    _homeRepo.fetchCityList(provId).then((value) {
+      cityList = ApiResponse.completed(value);
+    }).onError((error, stackTrace) {
+      cityList = ApiResponse.error(error.toString());
+    });
+  }
+
+  // Cost List Methods
   setCostList(ApiResponse<List<Costs>> response) {
     costList = response;
     notifyListeners();
   }
 
-  Future<void> getProvinceList() async {
-    setProvinceList(ApiResponse.loading());
-    _homeRepo.fetchProvinceList().then(
-      (value) {
-        setProvinceList(ApiResponse.completed(value));
-      },
-    ).onError((error, StackTrace) {
-      setProvinceList(ApiResponse.error(error.toString()));
-    });
-  }
-
-  ApiResponse<List<City>> cityList = ApiResponse.loading();
-
-  setCityList(ApiResponse<List<City>> response) {
-    cityList = response;
-    notifyListeners();
-  }
-
-  Future<void> getCityListOrigin(provId) async {
-    setCityListOrigin(ApiResponse.loading());
-    _homeRepo.fetchCityList(provId).then((value) {
-      setCityListOrigin(ApiResponse.completed(value));
-    }).onError((error, stackTrace) {
-      setCityListOrigin(ApiResponse.error(error.toString()));
-    });
-  }
-
-  Future<void> getCityListDestination(provId) async {
-    setCityListDestination(ApiResponse.loading());
-    _homeRepo.fetchCityList(provId).then((value) {
-      setCityListDestination(ApiResponse.completed(value));
-    }).onError((error, stackTrace) {
-      setCityListDestination(ApiResponse.error(error.toString()));
-    });
-  }
-
-  Future<void> getCityList(var provId) async {
-    setCityList(ApiResponse.loading());
-    _homeRepo.fetchCityList(provId).then(
-      (value) {
-        setCityList(ApiResponse.completed(value));
-      },
-    ).onError((error, StackTrace) {
-      setCityList(ApiResponse.error(error.toString()));
-    });
-  }
-
   Future<void> getCostList(
-      String selectedProvinceOrigin,
-      String selectedCityOrigin,
-      String selectedProvinceDestination,
-      String selectedCityDestination,
-      int itemWeight,
-      String selectedCourier) async {
+    String selectedProvinceAsal,
+    String selectedCityAsal,
+    String selectedProvinceTujuan,
+    String selectedCityTujuan,
+    int itemWeight,
+    String selectedCourier,
+  ) async {
     setLoading(true);
     _homeRepo
         .fetchCostList(
-            selectedProvinceOrigin,
-            selectedCityOrigin,
-            selectedProvinceDestination,
-            selectedCityDestination,
-            itemWeight,
-            selectedCourier)
+      selectedProvinceAsal,
+      selectedCityAsal,
+      selectedProvinceTujuan,
+      selectedCityTujuan,
+      itemWeight,
+      selectedCourier,
+    )
         .then((value) {
       setCostList(ApiResponse.completed(value));
       setLoading(false);
     }).onError((error, stackTrace) {
       setCostList(ApiResponse.error(error.toString()));
+      setLoading(false);
     });
   }
 }

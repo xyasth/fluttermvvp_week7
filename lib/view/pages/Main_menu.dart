@@ -19,7 +19,6 @@ class _MainMenuState extends State<MainMenu> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _selectedIndex = 0;
   }
@@ -27,27 +26,37 @@ class _MainMenuState extends State<MainMenu> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.lightGreen.shade50,
       body: DoubleBack(
-          child: _pages[_selectedIndex],
-          waitForSecondBackPress: 4,
-          onFirstBackPress: (context) {
-            return Fluttertoast.showToast(
-                msg: "press back again to close app!",
-                gravity: ToastGravity.BOTTOM,
-                toastLength: Toast.LENGTH_LONG,
-                backgroundColor: Colors.blueGrey,
-                textColor: Colors.white,
-                fontSize: 14);
-          }),
+        child: _pages[_selectedIndex],
+        waitForSecondBackPress: 4,
+        onFirstBackPress: (context) {
+          return Fluttertoast.showToast(
+            msg: "Press back again to close app!",
+            gravity: ToastGravity.BOTTOM,
+            toastLength: Toast.LENGTH_LONG,
+            backgroundColor: Colors.lightGreen.shade700,
+            textColor: Colors.white,
+            fontSize: 14,
+          );
+        },
+      ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.lightGreen,
         currentIndex: _selectedIndex,
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.lightGreen.shade900,
         onTap: _onItemTapped,
-        items: [
+        items: const [
           BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard), label: "dashboard"),
-          BottomNavigationBarItem(icon: Icon(Icons.money), label: "Cost info")
+            icon: Icon(Icons.dashboard),
+            label: "Dashboard",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.money),
+            label: "Cost Info",
+          ),
         ],
       ),
     );

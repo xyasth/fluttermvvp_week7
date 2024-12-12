@@ -10,10 +10,10 @@ class Costs_Page extends StatefulWidget {
 class _CostsPageState extends State<Costs_Page> {
   HomeViewmodel homeViewmodel = HomeViewmodel();
   final TextEditingController _weightController = TextEditingController();
-  dynamic selectedProvinceOrigin;
-  dynamic selectedCityOrigin;
-  dynamic selectedProvinceDestination;
-  dynamic selectedCityDestination;
+  dynamic selectedProvinceAsal;
+  dynamic selectedCityAsal;
+  dynamic selectedProvinceTujuan;
+  dynamic selectedCityTujuan;
   dynamic selectedCourier;
   List<String> courierLists = ["JNE", "POS", "TIKI"];
 
@@ -34,7 +34,7 @@ class _CostsPageState extends State<Costs_Page> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.lightGreen.shade700,
         title: const Text(
           "Hitung Ongkir",
           style: TextStyle(
@@ -50,58 +50,65 @@ class _CostsPageState extends State<Costs_Page> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Courier Dropdown
+                const Text(
+                  "Pengaturan Pengiriman",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Colors.blue),
+                ),
+                const SizedBox(height: 16),
+                // Courier and Weight Input
                 Row(
                   children: [
                     Expanded(
-                      child: Column(
-                        children: [
-                          DropdownButton<String>(
-                            isExpanded: true,
-                            value: selectedCourier,
-                            icon: const Icon(Icons.arrow_drop_down),
-                            hint: const Text("Pilih kurir"),
-                            items: courierLists.map<DropdownMenuItem<String>>(
-                                (String courier) {
-                              return DropdownMenuItem<String>(
-                                value: courier,
-                                child: Text(courier.toUpperCase()),
-                              );
-                            }).toList(),
-                            onChanged: (newValue) {
-                              setState(() {
-                                selectedCourier = newValue;
-                              });
-                            },
-                          ),
-                        ],
+                      child: DropdownButton<String>(
+                        isExpanded: true,
+                        value: selectedCourier,
+                        icon: const Icon(Icons.arrow_drop_down),
+                        hint: const Text("Pilih Kurir"),
+                        items: courierLists
+                            .map<DropdownMenuItem<String>>((String courier) {
+                          return DropdownMenuItem<String>(
+                            value: courier,
+                            child: Text(courier.toUpperCase()),
+                          );
+                        }).toList(),
+                        onChanged: (newValue) {
+                          setState(() {
+                            selectedCourier = newValue;
+                          });
+                        },
+                        style:
+                            const TextStyle(fontSize: 16, color: Colors.black),
                       ),
                     ),
                     const SizedBox(width: 16),
-                    // Weight Input
                     Expanded(
-                      child: Column(
-                        children: [
-                          TextField(
-                            controller: _weightController,
-                            keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                              labelText: "Berat barang (gr)",
-                            ),
+                      child: TextField(
+                        controller: _weightController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: "Berat Barang (gr)",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                        ],
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 12),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 16),
                   ],
                 ),
-                SizedBox(height: 4),
-                Text(
-                  "Origin",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                const SizedBox(height: 24),
+                const Text(
+                  "Asal Pengiriman",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.black),
                 ),
-                SizedBox(height: 2),
-                // Origin Province Dropdown
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     Expanded(
@@ -109,80 +116,174 @@ class _CostsPageState extends State<Costs_Page> {
                         builder: (context, value, _) {
                           switch (value.provinceList.status) {
                             case Status.loading:
-                              return const Align(
-                                alignment: Alignment.center,
+                              return const Center(
                                 child: CircularProgressIndicator(),
                               );
                             case Status.error:
-                              return Align(
-                                alignment: Alignment.center,
+                              return Center(
                                 child:
                                     Text(value.provinceList.message.toString()),
                               );
                             case Status.completed:
                               return DropdownButton(
-                                  isExpanded: true,
-                                  value: selectedProvinceOrigin,
-                                  icon: const Icon(Icons.arrow_drop_down),
-                                  hint: const Text("Pilih Provinsi"),
-                                  items: value.provinceList.data!
-                                      .map<DropdownMenuItem<Province>>(
-                                          (Province value) {
-                                    return DropdownMenuItem(
-                                        value: value,
-                                        child: Text(value.province.toString()));
-                                  }).toList(),
-                                  onChanged: (newValue) {
-                                    setState(() {
-                                      selectedProvinceOrigin = newValue;
-                                      selectedCityOrigin = null;
-                                    });
-                                    if (newValue != null) {
-                                      homeViewmodel.getCityListOrigin(
-                                          selectedProvinceOrigin.provinceId);
-                                    }
+                                isExpanded: true,
+                                value: selectedProvinceAsal,
+                                icon: const Icon(Icons.arrow_drop_down),
+                                hint: const Text("Pilih Provinsi"),
+                                items: value.provinceList.data!
+                                    .map<DropdownMenuItem<Province>>(
+                                        (Province value) {
+                                  return DropdownMenuItem(
+                                    value: value,
+                                    child: Text(value.province.toString()),
+                                  );
+                                }).toList(),
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    selectedProvinceAsal = newValue;
+                                    selectedCityAsal = null;
                                   });
+                                  if (newValue != null) {
+                                    homeViewmodel.getCityListAsal(
+                                        selectedProvinceAsal.provinceId);
+                                  }
+                                },
+                              );
                             default:
                               return Container();
                           }
                         },
                       ),
                     ),
-                    SizedBox(width: 16),
-                    // Origin City Dropdown
+                    const SizedBox(width: 16),
                     Expanded(
                       child: Consumer<HomeViewmodel>(
                         builder: (context, value, _) {
-                          switch (value.cityListOrigin.status) {
+                          switch (value.cityListAsal.status) {
                             case Status.loading:
-                              return const Align(
-                                alignment: Alignment.center,
+                              return const Center(
+                                child: Text("Isi Provinsi terlebih dahulu"),
+                              );
+                            case Status.error:
+                              return Center(
+                                child:
+                                    Text(value.cityListAsal.message.toString()),
+                              );
+                            case Status.completed:
+                              return DropdownButton(
+                                isExpanded: true,
+                                value: selectedCityAsal,
+                                icon: const Icon(Icons.arrow_drop_down),
+                                hint: const Text("Pilih Kota"),
+                                items: value.cityListAsal.data!
+                                    .map<DropdownMenuItem<City>>((City value) {
+                                  return DropdownMenuItem(
+                                    value: value,
+                                    child: Text(value.cityName.toString()),
+                                  );
+                                }).toList(),
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    selectedCityAsal = newValue;
+                                  });
+                                },
+                              );
+                            default:
+                              return Container();
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  "Tujuan Pengiriman",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.black),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Consumer<HomeViewmodel>(
+                        builder: (context, value, _) {
+                          switch (value.provinceList.status) {
+                            case Status.loading:
+                              return const Center(
                                 child: CircularProgressIndicator(),
                               );
                             case Status.error:
-                              return Align(
-                                alignment: Alignment.center,
+                              return Center(
+                                child:
+                                    Text(value.provinceList.message.toString()),
+                              );
+                            case Status.completed:
+                              return DropdownButton(
+                                isExpanded: true,
+                                value: selectedProvinceTujuan,
+                                icon: const Icon(Icons.arrow_drop_down),
+                                hint: const Text("Pilih Provinsi"),
+                                items: value.provinceList.data!
+                                    .map<DropdownMenuItem<Province>>(
+                                        (Province value) {
+                                  return DropdownMenuItem(
+                                    value: value,
+                                    child: Text(value.province.toString()),
+                                  );
+                                }).toList(),
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    selectedProvinceTujuan = newValue;
+                                    selectedCityTujuan = null;
+                                  });
+                                  if (newValue != null) {
+                                    homeViewmodel.getCityListTujuan(
+                                        selectedProvinceTujuan.provinceId);
+                                  }
+                                },
+                              );
+                            default:
+                              return Container();
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Consumer<HomeViewmodel>(
+                        builder: (context, value, _) {
+                          switch (value.cityListTujuan.status) {
+                            case Status.loading:
+                              return const Center(
+                                child: Text("Isi Provinsi terlebih dahulu"),
+                              );
+                            case Status.error:
+                              return Center(
                                 child: Text(
-                                    value.cityListOrigin.message.toString()),
+                                    value.cityListTujuan.message.toString()),
                               );
                             case Status.completed:
                               return DropdownButton(
-                                  isExpanded: true,
-                                  value: selectedCityOrigin,
-                                  icon: const Icon(Icons.arrow_drop_down),
-                                  hint: const Text("Pilih Kota"),
-                                  items: value.cityListOrigin.data!
-                                      .map<DropdownMenuItem<City>>(
-                                          (City value) {
-                                    return DropdownMenuItem(
-                                        value: value,
-                                        child: Text(value.cityName.toString()));
-                                  }).toList(),
-                                  onChanged: (newValue) {
-                                    setState(() {
-                                      selectedCityOrigin = newValue;
-                                    });
+                                isExpanded: true,
+                                value: selectedCityTujuan,
+                                icon: const Icon(Icons.arrow_drop_down),
+                                hint: const Text("Pilih Kota"),
+                                items: value.cityListTujuan.data!
+                                    .map<DropdownMenuItem<City>>((City value) {
+                                  return DropdownMenuItem(
+                                    value: value,
+                                    child: Text(value.cityName.toString()),
+                                  );
+                                }).toList(),
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    selectedCityTujuan = newValue;
                                   });
+                                },
+                              );
                             default:
                               return Container();
                           }
@@ -191,122 +292,24 @@ class _CostsPageState extends State<Costs_Page> {
                     ),
                   ],
                 ),
-                SizedBox(height: 4),
-                Text(
-                  "Destination",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                SizedBox(height: 2),
-                // Destination Province Dropdown
-                Row(
-                  children: [
-                    Expanded(
-                      child: Consumer<HomeViewmodel>(
-                        builder: (context, value, _) {
-                          switch (value.provinceList.status) {
-                            case Status.loading:
-                              return const Align(
-                                alignment: Alignment.center,
-                                child: CircularProgressIndicator(),
-                              );
-                            case Status.error:
-                              return Align(
-                                alignment: Alignment.center,
-                                child:
-                                    Text(value.provinceList.message.toString()),
-                              );
-                            case Status.completed:
-                              return DropdownButton(
-                                  isExpanded: true,
-                                  value: selectedProvinceDestination,
-                                  icon: const Icon(Icons.arrow_drop_down),
-                                  hint: const Text("Pilih Provinsi"),
-                                  items: value.provinceList.data!
-                                      .map<DropdownMenuItem<Province>>(
-                                          (Province value) {
-                                    return DropdownMenuItem(
-                                        value: value,
-                                        child: Text(value.province.toString()));
-                                  }).toList(),
-                                  onChanged: (newValue) {
-                                    setState(() {
-                                      selectedProvinceDestination = newValue;
-                                      selectedCityDestination = null;
-                                    });
-                                    if (newValue != null) {
-                                      homeViewmodel.getCityListDestination(
-                                          selectedProvinceDestination
-                                              .provinceId);
-                                    }
-                                  });
-                            default:
-                              return Container();
-                          }
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    // Destination City Dropdown
-                    Expanded(
-                      child: Consumer<HomeViewmodel>(
-                        builder: (context, value, _) {
-                          switch (value.cityListDestination.status) {
-                            case Status.loading:
-                              return const Align(
-                                alignment: Alignment.center,
-                                child: Text("isi provinsi terlebih dahulu"),
-                              );
-                            case Status.error:
-                              return Align(
-                                alignment: Alignment.center,
-                                child: Text(value.cityListDestination.message
-                                    .toString()),
-                              );
-                            case Status.completed:
-                              return DropdownButton(
-                                  isExpanded: true,
-                                  value: selectedCityDestination,
-                                  icon: const Icon(Icons.arrow_drop_down),
-                                  hint: const Text("Pilih Kota"),
-                                  items: value.cityListDestination.data!
-                                      .map<DropdownMenuItem<City>>(
-                                          (City value) {
-                                    return DropdownMenuItem(
-                                        value: value,
-                                        child: Text(value.cityName.toString()));
-                                  }).toList(),
-                                  onChanged: (newValue) {
-                                    setState(() {
-                                      selectedCityDestination = newValue;
-                                    });
-                                  });
-                            default:
-                              return Container();
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 4),
-                // Check Cost Button
+                const SizedBox(height: 24),
                 Center(
                   child: ElevatedButton(
                     onPressed: () {
                       if (selectedCourier != null &&
-                          selectedProvinceOrigin != null &&
-                          selectedCityOrigin != null &&
-                          selectedProvinceDestination != null &&
-                          selectedCityDestination != null) {
+                          selectedProvinceAsal != null &&
+                          selectedCityAsal != null &&
+                          selectedProvinceTujuan != null &&
+                          selectedCityTujuan != null) {
                         ScaffoldMessenger.of(context)
                             .showSnackBar(const SnackBar(
-                          content: Text("mengcek harga..."),
+                          content: Text("Mengcek harga..."),
                         ));
                         homeViewmodel.getCostList(
-                          selectedProvinceOrigin.toString(),
-                          selectedCityOrigin.cityId.toString(),
-                          selectedProvinceDestination.toString(),
-                          selectedCityDestination.cityId.toString(),
+                          selectedProvinceAsal.toString(),
+                          selectedCityAsal.cityId.toString(),
+                          selectedProvinceTujuan.toString(),
+                          selectedCityTujuan.cityId.toString(),
                           int.tryParse(_weightController.text.trim()) ?? 0,
                           selectedCourier.toString(),
                         );
@@ -319,53 +322,50 @@ class _CostsPageState extends State<Costs_Page> {
                       }
                     },
                     child: const Text(
-                      "hitung harga",
-                      style: TextStyle(color: Colors.white, fontSize: 14),
+                      "Hitung Harga",
+                      style: TextStyle(fontSize: 16),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue, // Padding inside the button
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32, vertical: 12),
+                      backgroundColor: Colors.blue,
                       shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(4), // Rounded corners
-                      ),
-                      textStyle: TextStyle(
-                        fontSize: 12, // Size of the text // Bold text
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                   ),
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 24),
                 Consumer<HomeViewmodel>(
                   builder: (context, value, _) {
                     if (value.costList.status == Status.loading) {
-                      return Center(
+                      return const Center(
                           child: Text("Isi data diatas terlebih dahulu"));
                     } else if (value.costList.status == Status.error) {
                       return Center(
                           child: Text("Error: ${value.costList.message}"));
                     } else if (value.costList.status == Status.completed) {
-                      final costData =
-                          value.costList.data; // Get the List<Costs>
+                      final costData = value.costList.data;
                       if (costData != null && costData.isNotEmpty) {
                         return Column(
                           children: costData.map((costs) {
                             return Card(
-                              margin: const EdgeInsets.symmetric(vertical: 8),
-                              surfaceTintColor:
-                                  const Color.fromARGB(255, 17, 0, 255),
+                              margin: const EdgeInsets.symmetric(
+                                  vertical: 8, horizontal: 8),
+                              elevation: 4,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                               child: ListTile(
-                                title:
-                                    Text(costs.service.toString() ?? "Invalid"),
+                                title: Text(costs.service ?? "Invalid"),
                                 subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment
-                                      .start, // Supaya teks rata kiri
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text("Service: ${costs.service ?? "-"}"),
                                     Text(
                                         "Cost: Rp${costs.cost![0].value ?? 0}"),
                                     Text(
                                         "Estimated day: ${costs.cost![0].etd ?? ""}"),
-                                    // Tambahkan subtitle lainnya sesuai kebutuhan
                                   ],
                                 ),
                               ),
@@ -376,7 +376,7 @@ class _CostsPageState extends State<Costs_Page> {
                         return const Text("No costs available.");
                       }
                     } else {
-                      return Container(); // This handles any other unknown state
+                      return Container();
                     }
                   },
                 )
